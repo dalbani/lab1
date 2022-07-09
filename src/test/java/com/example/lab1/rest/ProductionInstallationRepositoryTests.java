@@ -3,6 +3,8 @@ package com.example.lab1.rest;
 import com.example.lab1.model.ProductionInstallation;
 import com.example.lab1.repository.ProductionInstallationRepository;
 import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +12,11 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import static com.example.lab1.LambdaMatcher.matches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 
 class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
 
@@ -30,7 +31,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     @Autowired
     private ProductionInstallationRepository productionInstallationRepository;
 
-    private final AtomicLong createdInstallationId = new AtomicLong();
+    private Long createdInstallationId;
 
     @BeforeEach
     void beforeEach() {
@@ -39,9 +40,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
 
     @Test
     void testCreateValidInstallation() {
-        long count = contactRepository.count();
-
-        buildRequestSpecification()
+        ExtractableResponse<Response> response = buildRequestSpecification()
                 .body(ProductionInstallation.builder()
                         .name(NAME)
                         .outputPower(OUTPUT_POWER)
@@ -52,12 +51,15 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
-                .body("id", matches((Integer id) -> { createdInstallationId.set(id); return id > 0; }))
+                .body("id", greaterThan(0))
                 .body("name", equalTo(NAME))
-                .body("outputPower", equalTo(OUTPUT_POWER.floatValue()));
+                .body("outputPower", equalTo(OUTPUT_POWER.floatValue()))
+                .extract();
 
-        ProductionInstallation installation = productionInstallationRepository.findById(createdInstallationId.get()).orElseThrow();
-        assertThat(installation.getId()).isEqualTo(createdInstallationId.get());
+        createdInstallationId = response.jsonPath().getLong("id");
+
+        ProductionInstallation installation = productionInstallationRepository.findById(createdInstallationId).orElseThrow();
+        assertThat(installation.getId()).isEqualTo(createdInstallationId);
         assertThat(installation.getName()).isEqualTo(NAME);
         assertThat(installation.getOutputPower()).isEqualTo(OUTPUT_POWER);
 
@@ -67,7 +69,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
-                .body(JSON_BASE_PATH + "[0].id", equalTo(Long.valueOf(createdInstallationId.get()).intValue()))
+                .body(JSON_BASE_PATH + "[0].id", equalTo(createdInstallationId.intValue()))
                 .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
                 .body(JSON_BASE_PATH + "[0].outputPower", equalTo(OUTPUT_POWER.floatValue()));
     }
@@ -103,7 +105,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
-                .body(JSON_BASE_PATH + "[0].id", equalTo(Long.valueOf(createdInstallationId.get()).intValue()))
+                .body(JSON_BASE_PATH + "[0].id", equalTo(createdInstallationId.intValue()))
                 .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
                 .body(JSON_BASE_PATH + "[0].outputPower", equalTo(OUTPUT_POWER.floatValue()));
     }
@@ -134,7 +136,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
-                .body(JSON_BASE_PATH + "[0].id", equalTo(Long.valueOf(createdInstallationId.get()).intValue()))
+                .body(JSON_BASE_PATH + "[0].id", equalTo(createdInstallationId.intValue()))
                 .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
                 .body(JSON_BASE_PATH + "[0].outputPower", equalTo(OUTPUT_POWER.floatValue()));
     }
