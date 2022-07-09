@@ -2,14 +2,9 @@ package com.example.lab1.rest;
 
 import com.example.lab1.model.Contact;
 import com.example.lab1.repository.ContactRepository;
-import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,13 +12,10 @@ import org.springframework.http.MediaType;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.lab1.rest.LambdaMatcher.matches;
-import static io.restassured.RestAssured.with;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ContactRepositoryTests {
+class ContactRepositoryTests extends AbstractRepositoryTests {
 
     private static final String NAME = "My contact";
 
@@ -32,12 +24,6 @@ class ContactRepositoryTests {
     private static final String CITY = "Arnhem";
 
     private static final String HOUSE_NUMBER = "12a";
-
-    @Value("${spring.data.rest.base-path}")
-    private String restApiBasePath;
-
-    @LocalServerPort
-    private int serverPort;
 
     @Autowired
     private ContactRepository contactRepository;
@@ -148,14 +134,6 @@ class ContactRepositoryTests {
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
         assertThat(contactRepository.findById(createdContactId.get())).isEmpty();
-    }
-
-    private RequestSpecification buildRequestSpecification() {
-        String baseUri = String.format("http://localhost:%d%s", serverPort, restApiBasePath);
-
-        return with().baseUri(baseUri).config(
-                RestAssured.config()
-                        .encoderConfig(encoderConfig().appendDefaultContentCharsetToContentTypeIfUndefined(false)));
     }
 
 }
