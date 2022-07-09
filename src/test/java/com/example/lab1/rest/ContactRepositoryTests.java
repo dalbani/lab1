@@ -17,6 +17,10 @@ import static org.hamcrest.Matchers.equalTo;
 
 class ContactRepositoryTests extends AbstractRepositoryTests {
 
+    private static final String URI_BASE_PATH = "/contacts";
+
+    private static final String JSON_BASE_PATH = "_embedded.contacts";
+
     private static final String NAME = "My contact";
 
     private static final String ZIP_CODE = "0000AA";
@@ -40,7 +44,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                         .houseNumber(HOUSE_NUMBER)
                         .build())
                 .contentType(ContentType.JSON)
-                .post("/contacts")
+                .post(URI_BASE_PATH)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
@@ -58,10 +62,10 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
         assertThat(contact.getCity()).isEqualTo(CITY);
         assertThat(contact.getHouseNumber()).isEqualTo(HOUSE_NUMBER);
 
-        String jsonBasePath = String.format("_embedded.contacts[%d].", createdContactId.get() - 1);
+        String jsonBasePath = String.format(JSON_BASE_PATH + "[%d].", createdContactId.get() - 1);
 
         buildRequestSpecification()
-                .get("/contacts")
+                .get(URI_BASE_PATH)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -83,7 +87,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                         .houseNumber(HOUSE_NUMBER)
                         .build())
                 .contentType(ContentType.JSON)
-                .post("/contacts")
+                .post(URI_BASE_PATH)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -104,7 +108,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                         .houseNumber(HOUSE_NUMBER)
                         .build())
                 .contentType(ContentType.JSON)
-                .put("/contacts/" + createdContactId.get())
+                .put(URI_BASE_PATH + "/" + createdContactId.get())
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -128,7 +132,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
         whenCreateContact_thenSuccess();
 
         buildRequestSpecification()
-                .delete("/contacts/" + createdContactId.get())
+                .delete(URI_BASE_PATH + "/" + createdContactId.get())
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
