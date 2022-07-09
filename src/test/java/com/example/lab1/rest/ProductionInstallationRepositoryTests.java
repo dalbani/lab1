@@ -72,6 +72,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
 
     @Test
     void whenCreateInvalidInstallation_thenFail() {
+        HttpStatus expectedStatus = HttpStatus.BAD_REQUEST;
+
         buildRequestSpecification()
                 .body(ProductionInstallation.builder()
                         .name(NAME)
@@ -81,10 +83,11 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .post(URI_BASE_PATH)
                 .prettyPeek()
                 .then()
-                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .statusCode(expectedStatus.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaType.APPLICATION_JSON)))
-                .body("status", equalTo(HttpStatus.INTERNAL_SERVER_ERROR.value()))
-                .body("error", equalTo("Internal Server Error"));
+                .body("status", equalTo(expectedStatus.value()))
+                .body("error", equalTo(expectedStatus.getReasonPhrase()))
+                .body("problems[0]", equalTo("Property \"outputPower\": must be greater than or equal to 0.0001."));
     }
 
     @Test

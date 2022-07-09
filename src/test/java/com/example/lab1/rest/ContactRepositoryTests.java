@@ -79,6 +79,8 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
 
     @Test
     void whenCreateContactWithoutName_thenFail() {
+        HttpStatus expectedStatus = HttpStatus.BAD_REQUEST;
+
         buildRequestSpecification()
                 .body(Contact.builder()
                         .name("")
@@ -90,10 +92,11 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .post(URI_BASE_PATH)
                 .prettyPeek()
                 .then()
-                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .statusCode(expectedStatus.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaType.APPLICATION_JSON)))
-                .body("status", equalTo(HttpStatus.INTERNAL_SERVER_ERROR.value()))
-                .body("error", equalTo("Internal Server Error"));
+                .body("status", equalTo(expectedStatus.value()))
+                .body("error", equalTo(expectedStatus.getReasonPhrase()))
+                .body("problems[0]", equalTo("Property \"name\": must not be blank."));
     }
 
     @Test
