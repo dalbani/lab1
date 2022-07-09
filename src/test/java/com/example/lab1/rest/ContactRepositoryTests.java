@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.example.lab1.rest.LambdaMatcher.matches;
+import static com.example.lab1.LambdaMatcher.matches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 

@@ -1,4 +1,4 @@
-package com.example.lab1.rest;
+package com.example.lab1;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
