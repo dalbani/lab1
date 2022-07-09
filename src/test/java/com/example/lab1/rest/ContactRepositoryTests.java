@@ -35,7 +35,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     private final AtomicLong createdContactId = new AtomicLong();
 
     @Test
-    void whenCreateContact_thenSuccess() {
+    void testCreateContact() {
         buildRequestSpecification()
                 .body(Contact.builder()
                         .name(NAME)
@@ -78,7 +78,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenCreateContactWithoutName_thenFail() {
+    void testCreateContactWithoutName() {
         HttpStatus expectedStatus = HttpStatus.BAD_REQUEST;
 
         buildRequestSpecification()
@@ -100,8 +100,8 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenModifyContact_thenSuccess() {
-        whenCreateContact_thenSuccess();
+    void testModifyContact() {
+        testCreateContact();
 
         buildRequestSpecification()
                 .body(Contact.builder()
@@ -131,8 +131,8 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenDeleteContact_thenSuccess() {
-        whenCreateContact_thenSuccess();
+    void testDeleteContact() {
+        testCreateContact();
 
         buildRequestSpecification()
                 .delete(URI_BASE_PATH + "/" + createdContactId.get())

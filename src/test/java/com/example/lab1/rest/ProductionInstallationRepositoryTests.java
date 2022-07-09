@@ -38,7 +38,9 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenCreateValidInstallation_thenSucceed() {
+    void testCreateValidInstallation() {
+        long count = contactRepository.count();
+
         buildRequestSpecification()
                 .body(ProductionInstallation.builder()
                         .name(NAME)
@@ -71,7 +73,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenCreateInvalidInstallation_thenFail() {
+    void testCreateInvalidInstallation() {
         HttpStatus expectedStatus = HttpStatus.BAD_REQUEST;
 
         buildRequestSpecification()
@@ -91,8 +93,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenFindInstallationsByMatchingName_thenSucceed() {
-        whenCreateValidInstallation_thenSucceed();
+    void testFindInstallationsByMatchingName() {
+        testCreateValidInstallation();
 
         buildRequestSpecification()
                 .queryParam("name", NAME)
@@ -107,8 +109,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenFindInstallationsByNonMatchingName_thenFail() {
-        whenCreateValidInstallation_thenSucceed();
+    void testFindInstallationsByNonMatchingName() {
+        testCreateValidInstallation();
 
         buildRequestSpecification()
                 .queryParam("name", NAME.toUpperCase())
@@ -121,8 +123,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenFindInstallationsByMatchingOutputPower_thenSucceed() {
-        whenCreateValidInstallation_thenSucceed();
+    void testFindInstallationsByMatchingOutputPower() {
+        testCreateValidInstallation();
 
         buildRequestSpecification()
                 .queryParam("powerGreaterThan", 0.1)
@@ -139,7 +141,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
 
     @Test
     void whenFindInstallationsByNonMatchingOutputPower_thenFail() {
-        whenCreateValidInstallation_thenSucceed();
+        testCreateValidInstallation();
 
         buildRequestSpecification()
                 .queryParam("powerGreaterThan", 0.5)
