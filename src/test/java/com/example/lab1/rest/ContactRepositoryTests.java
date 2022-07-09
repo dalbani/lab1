@@ -88,6 +88,25 @@ class ContactRepositoryTests {
     }
 
     @Test
+    void whenCreateContactWithoutName_thenFail() {
+        buildRequestSpecification()
+                .body(Contact.builder()
+                        .name("")
+                        .zipCode(ZIP_CODE)
+                        .city(CITY)
+                        .houseNumber(HOUSE_NUMBER)
+                        .build())
+                .contentType(ContentType.JSON)
+                .post("/contacts")
+                .prettyPeek()
+                .then()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaType.APPLICATION_JSON)))
+                .body("status", equalTo(HttpStatus.INTERNAL_SERVER_ERROR.value()))
+                .body("error", equalTo("Internal Server Error"));
+    }
+
+    @Test
     void whenModifyContact_thenSuccess() {
         whenCreateContact_thenSuccess();
 
