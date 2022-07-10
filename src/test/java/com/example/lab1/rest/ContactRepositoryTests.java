@@ -3,18 +3,23 @@ package com.example.lab1.rest;
 import com.example.lab1.model.Contact;
 import com.example.lab1.repository.ContactRepository;
 import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import static com.example.lab1.LambdaMatcher.matches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ContactRepositoryTests extends AbstractRepositoryTests {
 
     private static final String URI_BASE_PATH = "/contacts";
@@ -29,14 +34,15 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
 
     private static final String HOUSE_NUMBER = "12a";
 
+    private static Long createdContactId;
+
     @Autowired
     private ContactRepository contactRepository;
 
-    private final AtomicLong createdContactId = new AtomicLong();
-
     @Test
+    @Order(1)
     void testCreateContact() {
-        buildRequestSpecification()
+        ExtractableResponse<Response> response = buildRequestSpecification()
                 .body(Contact.builder()
                         .name(NAME)
                         .zipCode(ZIP_CODE)
@@ -49,20 +55,21 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
-                .body("id", matches((Integer id) -> { createdContactId.set(id); return id > 0; }))
+                .body("id", greaterThan(0))
                 .body("name", equalTo(NAME))
                 .body("zipCode", equalTo(ZIP_CODE))
                 .body("city", equalTo(CITY))
-                .body("houseNumber", equalTo(HOUSE_NUMBER));
+                .body("houseNumber", equalTo(HOUSE_NUMBER))
+                .extract();
 
-        Contact contact = contactRepository.findById(createdContactId.get()).orElseThrow();
-        assertThat(contact.getId()).isEqualTo(createdContactId.get());
+        createdContactId = response.jsonPath().getLong("id");
+
+        Contact contact = contactRepository.findById(createdContactId).orElseThrow();
+        assertThat(contact.getId()).isEqualTo(createdContactId);
         assertThat(contact.getName()).isEqualTo(NAME);
         assertThat(contact.getZipCode()).isEqualTo(ZIP_CODE);
         assertThat(contact.getCity()).isEqualTo(CITY);
         assertThat(contact.getHouseNumber()).isEqualTo(HOUSE_NUMBER);
-
-        String jsonBasePath = String.format(JSON_BASE_PATH + "[%d].", createdContactId.get() - 1);
 
         buildRequestSpecification()
                 .get(URI_BASE_PATH)
@@ -70,14 +77,15 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
-                .body(jsonBasePath + "id", equalTo(Long.valueOf(createdContactId.get()).intValue()))
-                .body(jsonBasePath + "name", equalTo(NAME))
-                .body(jsonBasePath + "zipCode", equalTo(ZIP_CODE))
-                .body(jsonBasePath + "city", equalTo(CITY))
-                .body(jsonBasePath + "houseNumber", equalTo(HOUSE_NUMBER));
+                .body(JSON_BASE_PATH + "[0].id", equalTo(createdContactId.intValue()))
+                .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
+                .body(JSON_BASE_PATH + "[0].zipCode", equalTo(ZIP_CODE))
+                .body(JSON_BASE_PATH + "[0].city", equalTo(CITY))
+                .body(JSON_BASE_PATH + "[0].houseNumber", equalTo(HOUSE_NUMBER));
     }
 
     @Test
+    @Order(2)
     void testCreateContactWithoutName() {
         HttpStatus expectedStatus = HttpStatus.BAD_REQUEST;
 
@@ -100,9 +108,8 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
+    @Order(3)
     void testModifyContact() {
-        testCreateContact();
-
         buildRequestSpecification()
                 .body(Contact.builder()
                         .name(NAME.toUpperCase())
@@ -111,19 +118,19 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                         .houseNumber(HOUSE_NUMBER)
                         .build())
                 .contentType(ContentType.JSON)
-                .put(URI_BASE_PATH + "/" + createdContactId.get())
+                .put(URI_BASE_PATH + "/" + createdContactId)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
-                .body("id", equalTo(Long.valueOf(createdContactId.get()).intValue()))
+                .body("id", equalTo(createdContactId.intValue()))
                 .body("name", equalTo(NAME.toUpperCase()))
                 .body("zipCode", equalTo(ZIP_CODE))
                 .body("city", equalTo(CITY))
                 .body("houseNumber", equalTo(HOUSE_NUMBER));
 
-        Contact contact = contactRepository.findById(createdContactId.get()).orElseThrow();
-        assertThat(contact.getId()).isEqualTo(createdContactId.get());
+        Contact contact = contactRepository.findById(createdContactId).orElseThrow();
+        assertThat(contact.getId()).isEqualTo(createdContactId);
         assertThat(contact.getName()).isEqualTo(NAME.toUpperCase());
         assertThat(contact.getZipCode()).isEqualTo(ZIP_CODE);
         assertThat(contact.getCity()).isEqualTo(CITY);
@@ -131,16 +138,15 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
+    @Order(4)
     void testDeleteContact() {
-        testCreateContact();
-
         buildRequestSpecification()
-                .delete(URI_BASE_PATH + "/" + createdContactId.get())
+                .delete(URI_BASE_PATH + "/" + createdContactId)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
-        assertThat(contactRepository.findById(createdContactId.get())).isEmpty();
+        assertThat(contactRepository.findById(createdContactId)).isEmpty();
     }
 
 }
