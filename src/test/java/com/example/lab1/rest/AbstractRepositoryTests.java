@@ -1,10 +1,13 @@
 package com.example.lab1.rest;
 
 import com.example.lab1.model.Contact;
+import com.example.lab1.repository.ContactRepository;
+import com.example.lab1.repository.ProductionInstallationRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -20,6 +23,12 @@ abstract class AbstractRepositoryTests {
 
     @LocalServerPort
     private int serverPort;
+
+    @Autowired
+    protected ContactRepository contactRepository;
+
+    @Autowired
+    protected ProductionInstallationRepository productionInstallationRepository;
 
     public static class Fixtures {
         public static class Contact {

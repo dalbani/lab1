@@ -1,7 +1,6 @@
 package com.example.lab1.rest;
 
 import com.example.lab1.model.Contact;
-import com.example.lab1.repository.ContactRepository;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,9 +25,6 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     private static final String JSON_BASE_PATH = "_embedded.contacts";
 
     private static Long createdContactId;
-
-    @Autowired
-    private ContactRepository contactRepository;
 
     @Test
     @Order(1)

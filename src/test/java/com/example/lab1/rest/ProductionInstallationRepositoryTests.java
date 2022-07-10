@@ -1,7 +1,6 @@
 package com.example.lab1.rest;
 
 import com.example.lab1.model.ProductionInstallation;
-import com.example.lab1.repository.ProductionInstallationRepository;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -23,9 +22,6 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     private static final String URI_BASE_PATH = "/production-installations";
 
     private static final String JSON_BASE_PATH = "_embedded.productionInstallations";
-
-    @Autowired
-    private ProductionInstallationRepository productionInstallationRepository;
 
     private Long createdInstallationId;
 
