@@ -2,11 +2,14 @@ package com.example.lab1.rest;
 
 import com.example.lab1.model.ProductionInstallation;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.data.rest.webmvc.RestMediaTypes;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,22 +20,23 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
 
     private static final String URI_BASE_PATH = "/production-installations";
 
     private static final String JSON_BASE_PATH = "_embedded.productionInstallations";
 
-    private Long createdInstallationId;
+    private static Long createdInstallationId;
 
-    @BeforeEach
-    void beforeEach() {
-        productionInstallationRepository.deleteAll();
-    }
+    private static ExtractableResponse<Response> createInstallationResponse;
 
     @Test
+    @Order(1)
     void testCreateValidInstallation() {
-        ExtractableResponse<Response> response = buildRequestSpecification()
+        clearRepositories();
+
+        createInstallationResponse = buildRequestSpecification()
                 .body(ProductionInstallation.builder()
                         .name(Fixtures.ProductionInstallation.NAME)
                         .outputPower(Fixtures.ProductionInstallation.OUTPUT_POWER)
@@ -48,7 +52,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .body("outputPower", equalTo(Fixtures.ProductionInstallation.OUTPUT_POWER.floatValue()))
                 .extract();
 
-        createdInstallationId = response.jsonPath().getLong("id");
+        createdInstallationId = createInstallationResponse.jsonPath().getLong("id");
 
         ProductionInstallation installation = productionInstallationRepository.findById(createdInstallationId).orElseThrow();
         assertThat(installation.getId()).isEqualTo(createdInstallationId);
@@ -56,6 +60,9 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
         assertThat(installation.getOutputPower()).isEqualTo(Fixtures.ProductionInstallation.OUTPUT_POWER);
         assertThat(installation.getContact()).isNull();
 
+        //
+        // check that newly created production installation appears in the list
+        //
         buildRequestSpecification()
                 .get(URI_BASE_PATH)
                 .prettyPeek()
@@ -68,6 +75,52 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
+    @Order(2)
+    void testAssignContactToInstallation() {
+        String installationContactUri = createInstallationResponse.jsonPath().getString("_links.contact.href");
+
+        //
+        // check that no contact is currently associated with the production installation
+        //
+        buildRequestSpecification()
+                .get(installationContactUri)
+                .prettyPeek()
+                .then()
+                .statusCode(HttpStatus.NOT_FOUND.value());
+
+        Response createContactResponse = createValidContact();
+        JsonPath createContactJsonPath = createContactResponse.thenReturn().jsonPath();
+        Long contactId = createContactJsonPath.getLong("id");
+        String contactUri = createContactJsonPath.getString("_links.self.href");
+
+        //
+        // associate production installation with contact
+        //
+        buildRequestSpecification()
+                .body(contactUri)
+                .contentType(RestMediaTypes.TEXT_URI_LIST.toString())
+                .put(installationContactUri)
+                .prettyPeek()
+                .then()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        //
+        // check that a contact is now associated with the production installation
+        //
+        buildRequestSpecification()
+                .get(installationContactUri)
+                .prettyPeek()
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)));
+
+        assertThat(productionInstallationRepository.findById(createdInstallationId).orElseThrow().getContact()).isEqualTo(
+                contactRepository.findById(contactId).orElseThrow()
+        );
+    }
+
+    @Test
+    @Order(3)
     void testCreateInvalidInstallation() {
         HttpStatus expectedStatus = HttpStatus.BAD_REQUEST;
 
@@ -88,9 +141,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
+    @Order(4)
     void testFindInstallationsByMatchingName() {
-        testCreateValidInstallation();
-
         buildRequestSpecification()
                 .queryParam("name", Fixtures.ProductionInstallation.NAME)
                 .get(URI_BASE_PATH + "/search/findAllByName")
@@ -104,9 +156,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
+    @Order(5)
     void testFindInstallationsByNonMatchingName() {
-        testCreateValidInstallation();
-
         buildRequestSpecification()
                 .queryParam("name", Fixtures.ProductionInstallation.NAME.toUpperCase())
                 .get(URI_BASE_PATH + "/search/findAllByName")
@@ -118,9 +169,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
+    @Order(6)
     void testFindInstallationsByMatchingOutputPower() {
-        testCreateValidInstallation();
-
         buildRequestSpecification()
                 .queryParam("powerGreaterThan", 0.1)
                 .queryParam("powerLowerThan", 0.9)
@@ -135,9 +185,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     }
 
     @Test
-    void whenFindInstallationsByNonMatchingOutputPower_thenFail() {
-        testCreateValidInstallation();
-
+    @Order(7)
+    void whenFindInstallationsByNonMatchingOutputPower() {
         buildRequestSpecification()
                 .queryParam("powerGreaterThan", 0.5)
                 .queryParam("powerLowerThan", 0.6)

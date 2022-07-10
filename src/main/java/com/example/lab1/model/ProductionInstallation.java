@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
@@ -30,5 +31,8 @@ public class ProductionInstallation {
     @DecimalMin("0.0001")
     @DecimalMax("999999")
     private Double outputPower;
+
+    @OneToOne
+    private Contact contact;
 
 }
