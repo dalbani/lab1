@@ -48,6 +48,9 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
 
         createdContactId = response.jsonPath().getLong("id");
 
+        //
+        // check that the repository reflects the changes made via REST
+        //
         Contact contact = contactRepository.findById(createdContactId).orElseThrow();
         assertThat(contact.getId()).isEqualTo(createdContactId);
         assertThat(contact.getName()).isEqualTo(Fixtures.Contact.NAME);
@@ -55,6 +58,9 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
         assertThat(contact.getCity()).isEqualTo(Fixtures.Contact.CITY);
         assertThat(contact.getHouseNumber()).isEqualTo(Fixtures.Contact.HOUSE_NUMBER);
 
+        //
+        // check that newly created contact appears in the list
+        //
         buildRequestSpecification()
                 .get(URI_BASE_PATH)
                 .prettyPeek()
@@ -105,6 +111,9 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .body("city", equalTo(Fixtures.Contact.CITY))
                 .body("houseNumber", equalTo(Fixtures.Contact.HOUSE_NUMBER));
 
+        //
+        // check that the repository reflects the changes made via REST
+        //
         Contact contact = contactRepository.findById(createdContactId).orElseThrow();
         assertThat(contact.getId()).isEqualTo(createdContactId);
         assertThat(contact.getName()).isEqualTo(Fixtures.Contact.NAME.toUpperCase());
@@ -122,6 +131,9 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
+        //
+        // check that the repository reflects the changes made via REST
+        //
         assertThat(contactRepository.findById(createdContactId)).isEmpty();
     }
 
