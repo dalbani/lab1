@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.greaterThan;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ContactRepositoryTests extends AbstractRepositoryTests {
 
-    private static final String URI_BASE_PATH = "/contacts";
+    public static final String URI_BASE_PATH = "/contacts";
 
     private static final String JSON_BASE_PATH = "_embedded.contacts";
 
@@ -42,15 +42,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     @Test
     @Order(1)
     void testCreateContact() {
-        ExtractableResponse<Response> response = buildRequestSpecification()
-                .body(Contact.builder()
-                        .name(NAME)
-                        .zipCode(ZIP_CODE)
-                        .city(CITY)
-                        .houseNumber(HOUSE_NUMBER)
-                        .build())
-                .contentType(ContentType.JSON)
-                .post(URI_BASE_PATH)
+        ExtractableResponse<Response> response = createValidContact()
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
@@ -89,15 +81,7 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     void testCreateContactWithoutName() {
         HttpStatus expectedStatus = HttpStatus.BAD_REQUEST;
 
-        buildRequestSpecification()
-                .body(Contact.builder()
-                        .name("")
-                        .zipCode(ZIP_CODE)
-                        .city(CITY)
-                        .houseNumber(HOUSE_NUMBER)
-                        .build())
-                .contentType(ContentType.JSON)
-                .post(URI_BASE_PATH)
+        createInvalidContact()
                 .prettyPeek()
                 .then()
                 .statusCode(expectedStatus.value())
