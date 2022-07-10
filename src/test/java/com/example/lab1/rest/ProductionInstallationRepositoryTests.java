@@ -24,10 +24,6 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
 
     private static final String JSON_BASE_PATH = "_embedded.productionInstallations";
 
-    private static final String NAME = "My installation";
-
-    private static final Double OUTPUT_POWER = 0.123;
-
     @Autowired
     private ProductionInstallationRepository productionInstallationRepository;
 
@@ -42,8 +38,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
     void testCreateValidInstallation() {
         ExtractableResponse<Response> response = buildRequestSpecification()
                 .body(ProductionInstallation.builder()
-                        .name(NAME)
-                        .outputPower(OUTPUT_POWER)
+                        .name(Fixtures.ProductionInstallation.NAME)
+                        .outputPower(Fixtures.ProductionInstallation.OUTPUT_POWER)
                         .build())
                 .contentType(ContentType.JSON)
                 .post(URI_BASE_PATH)
@@ -52,16 +48,17 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .statusCode(HttpStatus.CREATED.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
                 .body("id", greaterThan(0))
-                .body("name", equalTo(NAME))
-                .body("outputPower", equalTo(OUTPUT_POWER.floatValue()))
+                .body("name", equalTo(Fixtures.ProductionInstallation.NAME))
+                .body("outputPower", equalTo(Fixtures.ProductionInstallation.OUTPUT_POWER.floatValue()))
                 .extract();
 
         createdInstallationId = response.jsonPath().getLong("id");
 
         ProductionInstallation installation = productionInstallationRepository.findById(createdInstallationId).orElseThrow();
         assertThat(installation.getId()).isEqualTo(createdInstallationId);
-        assertThat(installation.getName()).isEqualTo(NAME);
-        assertThat(installation.getOutputPower()).isEqualTo(OUTPUT_POWER);
+        assertThat(installation.getName()).isEqualTo(Fixtures.ProductionInstallation.NAME);
+        assertThat(installation.getOutputPower()).isEqualTo(Fixtures.ProductionInstallation.OUTPUT_POWER);
+        assertThat(installation.getContact()).isNull();
 
         buildRequestSpecification()
                 .get(URI_BASE_PATH)
@@ -70,8 +67,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
                 .body(JSON_BASE_PATH + "[0].id", equalTo(createdInstallationId.intValue()))
-                .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
-                .body(JSON_BASE_PATH + "[0].outputPower", equalTo(OUTPUT_POWER.floatValue()));
+                .body(JSON_BASE_PATH + "[0].name", equalTo(Fixtures.ProductionInstallation.NAME))
+                .body(JSON_BASE_PATH + "[0].outputPower", equalTo(Fixtures.ProductionInstallation.OUTPUT_POWER.floatValue()));
     }
 
     @Test
@@ -80,7 +77,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
 
         buildRequestSpecification()
                 .body(ProductionInstallation.builder()
-                        .name(NAME)
+                        .name(Fixtures.ProductionInstallation.NAME)
                         .outputPower(0.00)
                         .build())
                 .contentType(ContentType.JSON)
@@ -99,15 +96,15 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
         testCreateValidInstallation();
 
         buildRequestSpecification()
-                .queryParam("name", NAME)
+                .queryParam("name", Fixtures.ProductionInstallation.NAME)
                 .get(URI_BASE_PATH + "/search/findAllByName")
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
                 .body(JSON_BASE_PATH + "[0].id", equalTo(createdInstallationId.intValue()))
-                .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
-                .body(JSON_BASE_PATH + "[0].outputPower", equalTo(OUTPUT_POWER.floatValue()));
+                .body(JSON_BASE_PATH + "[0].name", equalTo(Fixtures.ProductionInstallation.NAME))
+                .body(JSON_BASE_PATH + "[0].outputPower", equalTo(Fixtures.ProductionInstallation.OUTPUT_POWER.floatValue()));
     }
 
     @Test
@@ -115,7 +112,7 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
         testCreateValidInstallation();
 
         buildRequestSpecification()
-                .queryParam("name", NAME.toUpperCase())
+                .queryParam("name", Fixtures.ProductionInstallation.NAME.toUpperCase())
                 .get(URI_BASE_PATH + "/search/findAllByName")
                 .prettyPeek()
                 .then()
@@ -137,8 +134,8 @@ class ProductionInstallationRepositoryTests extends AbstractRepositoryTests {
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
                 .body(JSON_BASE_PATH + "[0].id", equalTo(createdInstallationId.intValue()))
-                .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
-                .body(JSON_BASE_PATH + "[0].outputPower", equalTo(OUTPUT_POWER.floatValue()));
+                .body(JSON_BASE_PATH + "[0].name", equalTo(Fixtures.ProductionInstallation.NAME))
+                .body(JSON_BASE_PATH + "[0].outputPower", equalTo(Fixtures.ProductionInstallation.OUTPUT_POWER.floatValue()));
     }
 
     @Test

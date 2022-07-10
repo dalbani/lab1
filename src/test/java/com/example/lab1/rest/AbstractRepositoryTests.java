@@ -34,6 +34,13 @@ abstract class AbstractRepositoryTests {
 
         }
 
+        public static class ProductionInstallation {
+
+            public static final String NAME = "My installation";
+
+            public static final Double OUTPUT_POWER = 0.123;
+
+        }
     }
 
     protected Response createValidContact() {
