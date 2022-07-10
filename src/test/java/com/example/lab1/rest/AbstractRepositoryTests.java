@@ -52,6 +52,11 @@ abstract class AbstractRepositoryTests {
         }
     }
 
+    protected void clearRepositories() {
+        productionInstallationRepository.deleteAll();
+        contactRepository.deleteAll();
+    }
+
     protected Response createValidContact() {
         return buildRequestSpecification()
                 .body(Contact.builder()

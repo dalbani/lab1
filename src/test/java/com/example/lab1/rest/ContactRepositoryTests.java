@@ -29,6 +29,8 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     @Test
     @Order(1)
     void testCreateContact() {
+        clearRepositories();
+
         ExtractableResponse<Response> response = createValidContact()
                 .prettyPeek()
                 .then()
