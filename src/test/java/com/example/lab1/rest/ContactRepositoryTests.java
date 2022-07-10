@@ -26,14 +26,6 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
 
     private static final String JSON_BASE_PATH = "_embedded.contacts";
 
-    private static final String NAME = "My contact";
-
-    private static final String ZIP_CODE = "0000AA";
-
-    private static final String CITY = "Arnhem";
-
-    private static final String HOUSE_NUMBER = "12a";
-
     private static Long createdContactId;
 
     @Autowired
@@ -48,20 +40,20 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .statusCode(HttpStatus.CREATED.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
                 .body("id", greaterThan(0))
-                .body("name", equalTo(NAME))
-                .body("zipCode", equalTo(ZIP_CODE))
-                .body("city", equalTo(CITY))
-                .body("houseNumber", equalTo(HOUSE_NUMBER))
+                .body("name", equalTo(Fixtures.Contact.NAME))
+                .body("zipCode", equalTo(Fixtures.Contact.ZIP_CODE))
+                .body("city", equalTo(Fixtures.Contact.CITY))
+                .body("houseNumber", equalTo(Fixtures.Contact.HOUSE_NUMBER))
                 .extract();
 
         createdContactId = response.jsonPath().getLong("id");
 
         Contact contact = contactRepository.findById(createdContactId).orElseThrow();
         assertThat(contact.getId()).isEqualTo(createdContactId);
-        assertThat(contact.getName()).isEqualTo(NAME);
-        assertThat(contact.getZipCode()).isEqualTo(ZIP_CODE);
-        assertThat(contact.getCity()).isEqualTo(CITY);
-        assertThat(contact.getHouseNumber()).isEqualTo(HOUSE_NUMBER);
+        assertThat(contact.getName()).isEqualTo(Fixtures.Contact.NAME);
+        assertThat(contact.getZipCode()).isEqualTo(Fixtures.Contact.ZIP_CODE);
+        assertThat(contact.getCity()).isEqualTo(Fixtures.Contact.CITY);
+        assertThat(contact.getHouseNumber()).isEqualTo(Fixtures.Contact.HOUSE_NUMBER);
 
         buildRequestSpecification()
                 .get(URI_BASE_PATH)
@@ -70,10 +62,10 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
                 .body(JSON_BASE_PATH + "[0].id", equalTo(createdContactId.intValue()))
-                .body(JSON_BASE_PATH + "[0].name", equalTo(NAME))
-                .body(JSON_BASE_PATH + "[0].zipCode", equalTo(ZIP_CODE))
-                .body(JSON_BASE_PATH + "[0].city", equalTo(CITY))
-                .body(JSON_BASE_PATH + "[0].houseNumber", equalTo(HOUSE_NUMBER));
+                .body(JSON_BASE_PATH + "[0].name", equalTo(Fixtures.Contact.NAME))
+                .body(JSON_BASE_PATH + "[0].zipCode", equalTo(Fixtures.Contact.ZIP_CODE))
+                .body(JSON_BASE_PATH + "[0].city", equalTo(Fixtures.Contact.CITY))
+                .body(JSON_BASE_PATH + "[0].houseNumber", equalTo(Fixtures.Contact.HOUSE_NUMBER));
     }
 
     @Test
@@ -96,10 +88,10 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
     void testModifyContact() {
         buildRequestSpecification()
                 .body(Contact.builder()
-                        .name(NAME.toUpperCase())
-                        .zipCode(ZIP_CODE)
-                        .city(CITY)
-                        .houseNumber(HOUSE_NUMBER)
+                        .name(Fixtures.Contact.NAME.toUpperCase())
+                        .zipCode(Fixtures.Contact.ZIP_CODE)
+                        .city(Fixtures.Contact.CITY)
+                        .houseNumber(Fixtures.Contact.HOUSE_NUMBER)
                         .build())
                 .contentType(ContentType.JSON)
                 .put(URI_BASE_PATH + "/" + createdContactId)
@@ -108,17 +100,17 @@ class ContactRepositoryTests extends AbstractRepositoryTests {
                 .statusCode(HttpStatus.OK.value())
                 .contentType(matches(contentType -> MediaType.parseMediaType(contentType).isCompatibleWith(MediaTypes.HAL_JSON)))
                 .body("id", equalTo(createdContactId.intValue()))
-                .body("name", equalTo(NAME.toUpperCase()))
-                .body("zipCode", equalTo(ZIP_CODE))
-                .body("city", equalTo(CITY))
-                .body("houseNumber", equalTo(HOUSE_NUMBER));
+                .body("name", equalTo(Fixtures.Contact.NAME.toUpperCase()))
+                .body("zipCode", equalTo(Fixtures.Contact.ZIP_CODE))
+                .body("city", equalTo(Fixtures.Contact.CITY))
+                .body("houseNumber", equalTo(Fixtures.Contact.HOUSE_NUMBER));
 
         Contact contact = contactRepository.findById(createdContactId).orElseThrow();
         assertThat(contact.getId()).isEqualTo(createdContactId);
-        assertThat(contact.getName()).isEqualTo(NAME.toUpperCase());
-        assertThat(contact.getZipCode()).isEqualTo(ZIP_CODE);
-        assertThat(contact.getCity()).isEqualTo(CITY);
-        assertThat(contact.getHouseNumber()).isEqualTo(HOUSE_NUMBER);
+        assertThat(contact.getName()).isEqualTo(Fixtures.Contact.NAME.toUpperCase());
+        assertThat(contact.getZipCode()).isEqualTo(Fixtures.Contact.ZIP_CODE);
+        assertThat(contact.getCity()).isEqualTo(Fixtures.Contact.CITY);
+        assertThat(contact.getHouseNumber()).isEqualTo(Fixtures.Contact.HOUSE_NUMBER);
     }
 
     @Test

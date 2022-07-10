@@ -21,13 +21,28 @@ abstract class AbstractRepositoryTests {
     @LocalServerPort
     private int serverPort;
 
+    public static class Fixtures {
+        public static class Contact {
+
+            public static final String NAME = "My contact";
+
+            public static final String ZIP_CODE = "0000AA";
+
+            public static final String CITY = "Arnhem";
+
+            public static final String HOUSE_NUMBER = "12a";
+
+        }
+
+    }
+
     protected Response createValidContact() {
         return buildRequestSpecification()
                 .body(Contact.builder()
-                        .name(ContactRepositoryTests.NAME)
-                        .zipCode(ContactRepositoryTests.ZIP_CODE)
-                        .city(ContactRepositoryTests.CITY)
-                        .houseNumber(ContactRepositoryTests.HOUSE_NUMBER)
+                        .name(Fixtures.Contact.NAME)
+                        .zipCode(Fixtures.Contact.ZIP_CODE)
+                        .city(Fixtures.Contact.CITY)
+                        .houseNumber(Fixtures.Contact.HOUSE_NUMBER)
                         .build())
                 .contentType(ContentType.JSON)
                 .post(ContactRepositoryTests.URI_BASE_PATH);
@@ -37,9 +52,9 @@ abstract class AbstractRepositoryTests {
         return buildRequestSpecification()
                 .body(Contact.builder()
                         .name("")
-                        .zipCode(ContactRepositoryTests.ZIP_CODE)
-                        .city(ContactRepositoryTests.CITY)
-                        .houseNumber(ContactRepositoryTests.HOUSE_NUMBER)
+                        .zipCode(Fixtures.Contact.ZIP_CODE)
+                        .city(Fixtures.Contact.CITY)
+                        .houseNumber(Fixtures.Contact.HOUSE_NUMBER)
                         .build())
                 .contentType(ContentType.JSON)
                 .post(ContactRepositoryTests.URI_BASE_PATH);
