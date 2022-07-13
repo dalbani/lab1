@@ -1,0 +1,2 @@
+INSERT INTO CONTACT (ID, NAME, ZIP_CODE, CITY, HOUSE_NUMBER)
+VALUES (1, 'Bruce Wayne', '12345', 'Gotham City', '42');
